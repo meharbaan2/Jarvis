@@ -177,40 +177,36 @@ class AIService(ai_service_pb2_grpc.AIServiceServicer):
             self.voice_settings = None
 
     def _speak_punjabi(self, text):
-        """Use Google TTS for Punjabi speech"""
-        temp_file = None
+        """Robust Punjabi TTS with proper cleanup"""
+        temp_path = None
         try:
-            # Create temp file with explicit encoding
-            temp_file = tempfile.NamedTemporaryFile(suffix='.mp3', delete=False)
-            temp_path = temp_file.name
-            temp_file.close()  # Close handle so gTTS can write
+            # Create temp file
+            with tempfile.NamedTemporaryFile(suffix='.mp3', delete=False) as tmp:
+                temp_path = tmp.name
         
-            # Generate Punjabi speech
+            # Generate speech
             tts = gTTS(text=text, lang='pa', slow=False)
             tts.save(temp_path)
         
-            # Verify file was created
+            # Verify file
             if not os.path.exists(temp_path) or os.path.getsize(temp_path) == 0:
-                raise RuntimeError("gTTS failed to create valid audio file")
-            
-            # Play audio
+                raise RuntimeError("Empty audio file generated")
+
+            # Play audio synchronously
             sound = AudioSegment.from_mp3(temp_path)
-            play(sound)
+            play(sound)  # This will block until playback completes
         
         except Exception as e:
-            logger.error(f"Punjabi TTS failed: {str(e)}", exc_info=True)
-            # Fallback to English speech
-            english_fallback = "Punjabi speech unavailable. Here's the English version."
-            self._speak_response(english_fallback + " " + text)
-        
+            logger.error(f"Punjabi TTS failed: {e}")
+            # Fallback to English
+            self._speak_response(f"[Punjabi unavailable] {text}")
         finally:
-            # Clean up temp file
-            if temp_file and os.path.exists(temp_path):
+            if temp_path and os.path.exists(temp_path):
                 try:
                     os.unlink(temp_path)
-                except Exception as cleanup_err:
-                    logger.warning(f"Cleanup failed: {cleanup_err}")
-
+                except:
+                    pass
+            
 
     def GetSystemStatus(self, request, context):
         """gRPC endpoint for system status and weather"""
@@ -335,46 +331,90 @@ class AIService(ai_service_pb2_grpc.AIServiceServicer):
         # Print immediately
         print(f"\nJ.A.R.V.I.S: {text}\n")
 
-        # Detect language
-        try:
-            lang = detect(text)
-        except:
-            lang = 'en'  # Default to English if detection fails
+
+        # Split text into segments by language
+        segments = self._split_text_by_language(text)
 
         # Start speech in a thread
         def speak_job():
             try:
-                if lang == 'pa' and self.voice_settings.get('use_gtts', True):
-                    self._speak_punjabi(text)
-                else:
-                    if self.voice_settings['engine_type'] == 'sapi':
-                        engine = win32com.client.Dispatch("SAPI.SpVoice")
-                        if 'voice' in self.voice_settings:
-                            engine.Voice = self.voice_settings['voice']
-                        engine.Rate = self.voice_settings['rate']
-                        # Speak entire response at once for SAPI (better flow)
-                        engine.Speak(text)
-                    else:  # pyttsx3
-                        engine = pyttsx3.init()
-                        if self.voice_settings['voice_id']:
-                            engine.setProperty('voice', self.voice_settings['voice_id'])
-                        engine.setProperty('rate', self.voice_settings['rate'])
-                        engine.setProperty('volume', self.voice_settings['volume'])
-                
-                        # Only pause after sentences for pyttsx3
-                        sentences = [s.strip() for s in text.split('.') if s.strip()]
-                        for i, sentence in enumerate(sentences):
-                            engine.say(sentence + ("." if i < len(sentences)-1 else ""))
+                    # First stop any ongoing speech
+                if self.voice_settings['engine_type'] == 'pyttsx3':
+                    self.voice_engine.stop()
+                elif hasattr(self, '_last_tts_process'):
+                    self._last_tts_process.terminate()
+            
+                time.sleep(1.0)  # Ensure complete stop
+
+                for i, (text_part, lang) in enumerate(segments):
+                    if not text_part.strip():
+                        continue
+
+                    if lang == 'pa':
+                        # For Punjabi, use gTTS
+                        self._speak_punjabi(text_part)
+                    else:
+                        # For English, use the configured engine
+                        if self.voice_settings['engine_type'] == 'sapi':
+                            engine = win32com.client.Dispatch("SAPI.SpVoice")
+                            engine.Rate = self.voice_settings['rate']
+                            engine.Speak(text_part)
+                        else:
+                            engine = pyttsx3.init()
+                            engine.setProperty('rate', self.voice_settings['rate'])
+                            engine.say(text_part)
                             engine.runAndWait()
-                            if i < len(sentences)-1:  # Don't pause after last sentence
-                                time.sleep(self.voice_settings['pauses']['sentence'])
                 
-                        engine.stop()
+                    # Add pause between segments but not after last one
+                    if i < len(segments) - 1:
+                        time.sleep(1.35)  # 1 second pause between language changes
+
             except Exception as e:
                 logger.error(f"Speech failed: {e}")
+                    
+                
 
         # Start the speech thread
         threading.Thread(target=speak_job, daemon=True).start()
+
+    def _split_text_by_language(self, text):
+        """Improved language segmentation that keeps punctuation with words"""
+        segments = []
+        current_lang = 'en'  # Default to English
+        current_segment = []
+        punjabi_range = range(0x0A00, 0x0A7F)  # Gurmukhi Unicode range
+
+        i = 0
+        while i < len(text):
+            char = text[i]
+        
+            # Check if character is Punjabi
+            is_punjabi = ord(char) in punjabi_range if char.strip() else False
+        
+            # Handle language transitions
+            if is_punjabi and current_lang != 'pa':
+                if current_segment:
+                    segments.append((''.join(current_segment), current_lang))
+                current_segment = []
+                current_lang = 'pa'
+            elif not is_punjabi and current_lang == 'pa' and char.strip():
+                # Look ahead to see if this is a punctuation after Punjabi
+                if i+1 < len(text) and not text[i+1].strip():
+                    # If next character is whitespace/punctuation, keep in Punjabi segment
+                    pass
+                else:
+                    if current_segment:
+                        segments.append((''.join(current_segment), current_lang))
+                    current_segment = []
+                    current_lang = 'en'
+        
+            current_segment.append(char)
+            i += 1
+
+        if current_segment:
+            segments.append((''.join(current_segment), current_lang))
+    
+        return segments
 
     def _init_db(self):
             """Initialize the database tables"""
@@ -676,19 +716,6 @@ class AIService(ai_service_pb2_grpc.AIServiceServicer):
             answer = "Could not determine the answer"
     
         return answer
-
-    # def _process_with_mistral(self, prompt):
-    #     """Handle general queries with official Mistral API"""
-    #     try:
-    #         chat_response = self.mistral_client.chat.complete(
-    #             model=self.mistral_model,
-    #             messages=[{"role": "user", "content": prompt}]
-    #         )
-
-    #         return chat_response.choices[0].message.content
-    #     except Exception as e:
-    #         logger.error(f"Mistral API error: {e}")
-    #         return "I couldn't process your request. Please try again later."
 
     def _process_with_mistral(self, prompt):
         """Enhanced Mistral processing with memory integration"""
