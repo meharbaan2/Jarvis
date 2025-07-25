@@ -197,22 +197,37 @@ class AIService(ai_service_pb2_grpc.AIServiceServicer):
             r = sr.Recognizer()
             with sr.AudioFile(wav_io) as source:
                 audio_data = r.record(source)
-                text = r.recognize_google(
-                    audio_data,
-                    language=request.language_code
-                )
-        
-            return ai_service_pb2.QueryResponse(
-                response_text=text,
-                ai_source="SpeechRecognition"
-            )
-        
+
+                if request.language_code == "pa-IN":
+                    # Punjabi-specific processing
+                    text = r.recognize_google(
+                        audio_data,
+                        language="pa-IN",
+                        show_all=False
+                    )
+                    # Keep Gurmukhi text as-is
+                    return ai_service_pb2.QueryResponse(
+                        response_text=text,
+                        ai_source="PunjabiSpeechRecognition"
+                    )
+                else:
+                    # Default English processing
+                    text = r.recognize_google(
+                        audio_data,
+                        language="en-US",
+                        show_all=False
+                    )
+                    return ai_service_pb2.QueryResponse(
+                        response_text=text,
+                        ai_source="EnglishSpeechRecognition"
+                    )
+                
         except Exception as e:
-            logger.error(f"Speech recognition failed: {e}")
+            logger.error(f"Recognition failed: {e}")
             return ai_service_pb2.QueryResponse(
-                response_text="Could not understand audio",
+                response_text="ਅਸਮਰੱਥ (Unable to process)" if request.language_code == "pa-IN" else "Unable to process",
                 ai_source="System"
-            )
+        )
 
     def _speak_punjabi(self, text):
         """Robust Punjabi TTS with proper cleanup"""

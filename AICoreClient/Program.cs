@@ -48,6 +48,15 @@ while (true)
 {
     try
     {
+        // Language selection
+        Console.WriteLine("\nChoose language:");
+        Console.WriteLine("1. English");
+        Console.WriteLine("2. ਪੰਜਾਬੀ (Punjabi)");
+        Console.Write("> ");
+        var langChoice = Console.ReadLine();
+        var languageCode = langChoice == "2" ? "pa-IN" : "en-US";
+
+        // Input method selection
         Console.WriteLine("\nChoose input method:");
         Console.WriteLine("1. Type text");
         Console.WriteLine("2. Speak (5 second max)");
@@ -59,25 +68,33 @@ while (true)
 
         if (choice == "2") // Voice input
         {
-            Console.WriteLine("\nSpeak now... (5 second maximum)");
+            Console.WriteLine(languageCode == "pa-IN"
+                ? "\nਹੁਣ ਬੋਲੋ... (੫ ਸਕਿੰਟ ਦੀ ਹਦ)"
+                : "\nSpeak now... (5 second limit)");
+
             var audioData = CaptureAudio();
 
             // Send audio to server
             var audioRequest = new AudioRequest
             {
                 AudioData = ByteString.CopyFrom(audioData),
-                LanguageCode = "en-US", // or "pa-IN"
+                LanguageCode = languageCode, // or "pa-IN"
                 SampleRate = 16000
             };
 
             var textResponse = client.RecognizeSpeech(audioRequest);
             textInput = textResponse.ResponseText;
 
-            Console.WriteLine($"\nYou said: {textInput}");
+            Console.WriteLine(languageCode == "pa-IN"
+                ? $"\nਤੁਸੀਂ ਕਿਹਾ: {textInput}"
+                : $"\nYou said: {textInput}");
         }
         else if (choice == "1") // Text input
         {
-            Console.Write("\nEnter your message: ");
+            Console.Write(languageCode == "pa-IN"
+                ? "\nਆਪਣਾ ਸੁਨੇਹਾ ਲਿਖੋ: "
+                : "\nEnter your message: ");
+
             textInput = Console.ReadLine() ?? "";
         }
         else if (choice == "3")
@@ -93,7 +110,10 @@ while (true)
             InputText = textInput
         });
 
-        Console.WriteLine($"\nAI ({aiResponse.AiSource}) says: {aiResponse.ResponseText}\n");
+        // Display response
+        Console.WriteLine(languageCode == "pa-IN"
+            ? $"\nAI ਨੇ ਕਿਹਾ: {aiResponse.ResponseText}\n"
+            : $"\nAI says: {aiResponse.ResponseText}\n");
     }
     catch (Exception ex)
     {
