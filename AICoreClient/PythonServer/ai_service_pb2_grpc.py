@@ -44,6 +44,11 @@ class AIServiceStub(object):
                 request_serializer=ai__service__pb2.Empty.SerializeToString,
                 response_deserializer=ai__service__pb2.SystemStatus.FromString,
                 _registered_method=True)
+        self.RecognizeSpeech = channel.unary_unary(
+                '/AIService/RecognizeSpeech',
+                request_serializer=ai__service__pb2.AudioRequest.SerializeToString,
+                response_deserializer=ai__service__pb2.QueryResponse.FromString,
+                _registered_method=True)
 
 
 class AIServiceServicer(object):
@@ -62,6 +67,12 @@ class AIServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def RecognizeSpeech(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_AIServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -74,6 +85,11 @@ def add_AIServiceServicer_to_server(servicer, server):
                     servicer.GetSystemStatus,
                     request_deserializer=ai__service__pb2.Empty.FromString,
                     response_serializer=ai__service__pb2.SystemStatus.SerializeToString,
+            ),
+            'RecognizeSpeech': grpc.unary_unary_rpc_method_handler(
+                    servicer.RecognizeSpeech,
+                    request_deserializer=ai__service__pb2.AudioRequest.FromString,
+                    response_serializer=ai__service__pb2.QueryResponse.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -130,6 +146,33 @@ class AIService(object):
             '/AIService/GetSystemStatus',
             ai__service__pb2.Empty.SerializeToString,
             ai__service__pb2.SystemStatus.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def RecognizeSpeech(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/AIService/RecognizeSpeech',
+            ai__service__pb2.AudioRequest.SerializeToString,
+            ai__service__pb2.QueryResponse.FromString,
             options,
             channel_credentials,
             insecure,

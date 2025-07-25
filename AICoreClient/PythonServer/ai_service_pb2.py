@@ -24,7 +24,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x10\x61i_service.proto\"\"\n\x0cQueryRequest\x12\x12\n\ninput_text\x18\x01 \x01(\t\"9\n\rQueryResponse\x12\x15\n\rresponse_text\x18\x01 \x01(\t\x12\x11\n\tai_source\x18\x02 \x01(\t\"\x07\n\x05\x45mpty\"\xad\x01\n\x0cSystemStatus\x12\x10\n\x08greeting\x18\x01 \x01(\t\x12\x16\n\x0eweather_report\x18\x02 \x01(\t\x12\x10\n\x08location\x18\x03 \x01(\t\x12\x13\n\x0btemperature\x18\x04 \x01(\x02\x12\x12\n\nconditions\x18\x05 \x01(\t\x12\x12\n\nwind_speed\x18\x06 \x01(\x02\x12\x10\n\x08humidity\x18\x07 \x01(\x05\x12\x12\n\nlocal_time\x18\x08 \x01(\t2d\n\tAIService\x12-\n\x0cProcessQuery\x12\r.QueryRequest\x1a\x0e.QueryResponse\x12(\n\x0fGetSystemStatus\x12\x06.Empty\x1a\r.SystemStatusB\x0f\xaa\x02\x0c\x41ICoreClientb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x10\x61i_service.proto\"\"\n\x0cQueryRequest\x12\x12\n\ninput_text\x18\x01 \x01(\t\"9\n\rQueryResponse\x12\x15\n\rresponse_text\x18\x01 \x01(\t\x12\x11\n\tai_source\x18\x02 \x01(\t\"\x07\n\x05\x45mpty\"\xad\x01\n\x0cSystemStatus\x12\x10\n\x08greeting\x18\x01 \x01(\t\x12\x16\n\x0eweather_report\x18\x02 \x01(\t\x12\x10\n\x08location\x18\x03 \x01(\t\x12\x13\n\x0btemperature\x18\x04 \x01(\x02\x12\x12\n\nconditions\x18\x05 \x01(\t\x12\x12\n\nwind_speed\x18\x06 \x01(\x02\x12\x10\n\x08humidity\x18\x07 \x01(\x05\x12\x12\n\nlocal_time\x18\x08 \x01(\t\"l\n\x0c\x41udioRequest\x12\x12\n\naudio_data\x18\x01 \x01(\x0c\x12\x15\n\rlanguage_code\x18\x02 \x01(\t\x12\x13\n\x0bsample_rate\x18\x03 \x01(\x05\x12\x12\n\x05model\x18\x04 \x01(\tH\x00\x88\x01\x01\x42\x08\n\x06_model2\x96\x01\n\tAIService\x12-\n\x0cProcessQuery\x12\r.QueryRequest\x1a\x0e.QueryResponse\x12(\n\x0fGetSystemStatus\x12\x06.Empty\x1a\r.SystemStatus\x12\x30\n\x0fRecognizeSpeech\x12\r.AudioRequest\x1a\x0e.QueryResponseB\x0f\xaa\x02\x0c\x41ICoreClientb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -40,6 +40,8 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_EMPTY']._serialized_end=122
   _globals['_SYSTEMSTATUS']._serialized_start=125
   _globals['_SYSTEMSTATUS']._serialized_end=298
-  _globals['_AISERVICE']._serialized_start=300
-  _globals['_AISERVICE']._serialized_end=400
+  _globals['_AUDIOREQUEST']._serialized_start=300
+  _globals['_AUDIOREQUEST']._serialized_end=408
+  _globals['_AISERVICE']._serialized_start=411
+  _globals['_AISERVICE']._serialized_end=561
 # @@protoc_insertion_point(module_scope)

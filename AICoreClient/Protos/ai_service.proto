@@ -4,6 +4,7 @@ option csharp_namespace = "AICoreClient";
 service AIService {
     rpc ProcessQuery (QueryRequest) returns (QueryResponse);
     rpc GetSystemStatus (Empty) returns (SystemStatus); // weather + greeting service
+    rpc RecognizeSpeech (AudioRequest) returns (QueryResponse);
 }
 
 message QueryRequest {
@@ -13,7 +14,6 @@ message QueryRequest {
 message QueryResponse {
     string response_text = 1;
     string ai_source = 2;  // "DeepSeek" or "ChatGPT"
-    //bool is_punjabi = 3;  // Add this new field
 }
 
 message Empty{} // For requests with no parameters
@@ -27,4 +27,11 @@ message SystemStatus {
     float wind_speed = 6;
     int32 humidity = 7;
     string local_time = 8;
+}
+
+message AudioRequest {
+    bytes audio_data = 1;          // Raw PCM audio data
+    string language_code = 2;      // "en-US" or "pa-IN"
+    int32 sample_rate = 3;         // 16000 (16kHz recommended)
+    optional string model = 4;     // Optional: "whisper" or "google"
 }

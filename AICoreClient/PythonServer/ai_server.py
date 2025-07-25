@@ -25,7 +25,9 @@ from pydub.playback import play
 import tempfile
 from langdetect import detect
 from pydub.utils import which
-AudioSegment.converter = which("C:/ffmpeg/bin/ffmpeg.exe")
+AudioSegment.converter = which("C:/ffmpeg/bin/ffmpeg.exe")# Add to existing imports
+import speech_recognition as sr
+import io
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -175,6 +177,42 @@ class AIService(ai_service_pb2_grpc.AIServiceServicer):
         except Exception as e:
             logger.error(f"Voice initialization error: {e}")
             self.voice_settings = None
+
+    def RecognizeSpeech(self, request, context):
+        """New gRPC method for speech recognition"""
+        try:
+            # Convert gRPC audio bytes to WAV
+            audio = AudioSegment.from_raw(
+                io.BytesIO(request.audio_data),
+                sample_width=2,
+                frame_rate=request.sample_rate,
+                channels=1
+            )
+        
+            # Export to WAV format
+            wav_io = io.BytesIO()
+            audio.export(wav_io, format="wav")
+        
+            # Recognize using Google Web API (most accurate free option)
+            r = sr.Recognizer()
+            with sr.AudioFile(wav_io) as source:
+                audio_data = r.record(source)
+                text = r.recognize_google(
+                    audio_data,
+                    language=request.language_code
+                )
+        
+            return ai_service_pb2.QueryResponse(
+                response_text=text,
+                ai_source="SpeechRecognition"
+            )
+        
+        except Exception as e:
+            logger.error(f"Speech recognition failed: {e}")
+            return ai_service_pb2.QueryResponse(
+                response_text="Could not understand audio",
+                ai_source="System"
+            )
 
     def _speak_punjabi(self, text):
         """Robust Punjabi TTS with proper cleanup"""

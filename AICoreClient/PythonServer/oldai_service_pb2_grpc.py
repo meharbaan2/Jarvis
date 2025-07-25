@@ -39,6 +39,11 @@ class AIServiceStub(object):
                 request_serializer=ai__service__pb2.QueryRequest.SerializeToString,
                 response_deserializer=ai__service__pb2.QueryResponse.FromString,
                 _registered_method=True)
+        self.GetSystemStatus = channel.unary_unary(
+                '/AIService/GetSystemStatus',
+                request_serializer=ai__service__pb2.Empty.SerializeToString,
+                response_deserializer=ai__service__pb2.SystemStatus.FromString,
+                _registered_method=True)
 
 
 class AIServiceServicer(object):
@@ -50,6 +55,13 @@ class AIServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def GetSystemStatus(self, request, context):
+        """weather + greeting service
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
 
 def add_AIServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
@@ -57,6 +69,11 @@ def add_AIServiceServicer_to_server(servicer, server):
                     servicer.ProcessQuery,
                     request_deserializer=ai__service__pb2.QueryRequest.FromString,
                     response_serializer=ai__service__pb2.QueryResponse.SerializeToString,
+            ),
+            'GetSystemStatus': grpc.unary_unary_rpc_method_handler(
+                    servicer.GetSystemStatus,
+                    request_deserializer=ai__service__pb2.Empty.FromString,
+                    response_serializer=ai__service__pb2.SystemStatus.SerializeToString,
             ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
@@ -86,6 +103,33 @@ class AIService(object):
             '/AIService/ProcessQuery',
             ai__service__pb2.QueryRequest.SerializeToString,
             ai__service__pb2.QueryResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetSystemStatus(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/AIService/GetSystemStatus',
+            ai__service__pb2.Empty.SerializeToString,
+            ai__service__pb2.SystemStatus.FromString,
             options,
             channel_credentials,
             insecure,
