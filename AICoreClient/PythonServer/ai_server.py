@@ -53,11 +53,10 @@ class AIService(ai_service_pb2_grpc.AIServiceServicer):
         self.voice_engine = pyttsx3.init()
 
         # Initialize voice engine
-        # self.voice_engine = None
         self._initialize_voice_engine()
 
         # Speak startup message
-        #self._announce_system_status()
+        self._announce_system_status()
 
         # Initialize database for long-term memory
         self.db_conn = sqlite3.connect('ai_memory.db', check_same_thread=False)
@@ -126,13 +125,23 @@ class AIService(ai_service_pb2_grpc.AIServiceServicer):
         try:
             self.voice_settings = {
                 'voice_id': None,
-                'rate': 150,  # Much slower speech rate (default is 200)
-                'volume': 0.95,
+                'base_rate': 165,  # Optimal JARVIS speed (150-170)
+                'base_volume': 0.92,  # Slightly below max for clarity
+                'base_pitch': 105,   # Slightly deeper than normal
                 'engine_type': 'pyttsx3',  # default
-                'pauses': {
-                    'sentence': 0.05,  # Longer pause between sentences
-                    'comma': 0.05,    # Pause after commas
-                    'colon': 0.1      # Pause after colons/semicolons
+                'dynamic_params': {
+                    'emphasis_rate': 0.85,  # Slow down 15% for emphasized words
+                    'question_pitch': 110,   # Higher pitch for questions
+                    'statement_pitch': 100,  # Lower pitch for statements
+                    'alert_volume': 1.0,     # Max volume for alerts
+                    'normal_volume': 0.9,
+                    'pause_factors': {
+                        'comma': 0.3,      # Relative pause lengths
+                        'period': 0.5,
+                        'question': 0.6,
+                        'exclamation': 0.4,
+                        'colon': 0.4
+                    }
                 },
                 'use_gtts': True  # Enable Google TTS for Punjabi
             }
@@ -407,6 +416,9 @@ class AIService(ai_service_pb2_grpc.AIServiceServicer):
                         # For Punjabi, use gTTS
                         self._speak_punjabi(text_part)
                     else:
+                        # Enhanced English speech processing
+                        processed_text = self._process_english_speech(text_part)
+
                         # For English, use the configured engine
                         if self.voice_settings['engine_type'] == 'sapi':
                             engine = win32com.client.Dispatch("SAPI.SpVoice")
@@ -414,22 +426,32 @@ class AIService(ai_service_pb2_grpc.AIServiceServicer):
                             engine.Speak(text_part)
                         else:
                             engine = pyttsx3.init()
-                            engine.setProperty('rate', self.voice_settings['rate'])
-                            engine.say(text_part)
+                            if self.voice_settings.get('voice_id'):
+                                engine.setProperty('voice', self.voice_settings['voice_id'])
+                            
+                        # Dynamic speech parameters
+                        engine.setProperty('rate', self._get_dynamic_rate(text_part))
+                        engine.setProperty('volume', self._get_dynamic_volume(text_part))
+                        engine.setProperty('pitch', self._get_dynamic_pitch(text_part))
+
+                        # Apply enhanced speech with pauses
+                        for sentence in self._split_into_sentences(processed_text):
+                            engine.say(sentence)
                             engine.runAndWait()
-                
+                            if not sentence.endswith(('!', '?')):  # Natural pause
+                                time.sleep(0.15)  # Subtle pause between sentences
+
                     # Add pause between segments but not after last one
                     if i < len(segments) - 1:
-                        time.sleep(1.35)  # 1 second pause between language changes
+                        time.sleep(0.8)  # Reduced from 1.35 Revert if not good
 
             except Exception as e:
                 logger.error(f"Speech failed: {e}")
                     
                 
-
         # Start the speech thread
         threading.Thread(target=speak_job, daemon=True).start()
-
+    
     def _split_text_by_language(self, text):
         """Improved language segmentation that keeps punctuation with words"""
         segments = []
@@ -468,6 +490,67 @@ class AIService(ai_service_pb2_grpc.AIServiceServicer):
             segments.append((''.join(current_segment), current_lang))
     
         return segments
+
+    def _process_english_speech(self, text):
+        """Add natural speech patterns to English text"""
+        # Add emphasis to important words
+        emphasis_words = ['sir', 'alert', 'warning', 'critical', 'important']
+        for word in emphasis_words:
+            if word in text.lower():
+                text = text.replace(word, f"*{word}*")  # pyttsx3 will naturally emphasize these
+    
+        # Add pauses for commas and periods
+        text = text.replace(",", ",,").replace(".", "..")
+    
+        # Slow down numbers and codes
+        text = re.sub(r'(\d{3,})', r' \1 ', text)  # Add spaces around long numbers
+    
+        return text
+
+    def _get_dynamic_rate(self, text):
+        """Adjust speed based on content type"""
+        base_rate = self.voice_settings.get('rate', 150)
+    
+        # Slow down for complex content
+        if any(word in text.lower() for word in ['warning', 'alert', 'important']):
+            return base_rate * 0.9  # 10% slower
+    
+        # Speed up slightly for simple confirmations
+        if len(text.split()) < 5 and '?' not in text:
+            return base_rate * 1.1  # 10% faster
+    
+        return base_rate
+
+    def _get_dynamic_volume(self, text):
+        """Adjust volume based on importance"""
+        base_volume = self.voice_settings.get('volume', 0.9)
+    
+        if any(word in text.lower() for word in ['alert', 'warning']):
+            return min(1.0, base_volume * 1.2)  # 20% louder for alerts
+    
+        if len(text.split()) > 15:  # Longer sentences slightly quieter
+            return max(0.7, base_volume * 0.9)
+    
+        return base_volume
+
+    def _split_into_sentences(self, text):
+        """Split text into natural speaking chunks"""
+        # Split by punctuation but keep the delimiters
+        parts = re.split('([.!?])', text)
+        sentences = []
+    
+        # Recombine with punctuation
+        for i in range(0, len(parts)-1, 2):
+            sentence = (parts[i] + parts[i+1]).strip()
+            if sentence:
+                sentences.append(sentence)
+    
+        if len(parts) % 2 == 1:  # Handle odd case
+            last_part = parts[-1].strip()
+            if last_part:
+                sentences.append(last_part)
+    
+        return sentences
 
     def _init_db(self):
             """Initialize the database tables"""
