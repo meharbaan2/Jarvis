@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Coding\\Hivemind\\AIAssistantUI\\AIAssistantUI.csproj": {}
+    "D:\\Coding\\GithubJarvis\\AIAssistantUI\\AIAssistantUI.csproj": {}
   },
   "projects": {
-    "D:\\Coding\\Hivemind\\AIAssistantUI\\AIAssistantUI.csproj": {
+    "D:\\Coding\\GithubJarvis\\AIAssistantUI\\AIAssistantUI.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Coding\\Hivemind\\AIAssistantUI\\AIAssistantUI.csproj",
+        "projectUniqueName": "D:\\Coding\\GithubJarvis\\AIAssistantUI\\AIAssistantUI.csproj",
         "projectName": "AIAssistantUI",
-        "projectPath": "D:\\Coding\\Hivemind\\AIAssistantUI\\AIAssistantUI.csproj",
+        "projectPath": "D:\\Coding\\GithubJarvis\\AIAssistantUI\\AIAssistantUI.csproj",
         "packagesPath": "C:\\Users\\mehar\\.nuget\\packages\\",
-        "outputPath": "D:\\Coding\\Hivemind\\AIAssistantUI\\obj\\",
+        "outputPath": "D:\\Coding\\GithubJarvis\\AIAssistantUI\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
@@ -32,8 +32,8 @@
           "net8.0-windows7.0": {
             "targetAlias": "net8.0-windows",
             "projectReferences": {
-              "D:\\Coding\\Hivemind\\AICoreClient\\AICoreClient.csproj": {
-                "projectPath": "D:\\Coding\\Hivemind\\AICoreClient\\AICoreClient.csproj"
+              "D:\\Coding\\GithubJarvis\\AICoreClient\\AICoreClient.csproj": {
+                "projectPath": "D:\\Coding\\GithubJarvis\\AICoreClient\\AICoreClient.csproj"
               }
             }
           }
@@ -76,14 +76,14 @@
         }
       }
     },
-    "D:\\Coding\\Hivemind\\AICoreClient\\AICoreClient.csproj": {
+    "D:\\Coding\\GithubJarvis\\AICoreClient\\AICoreClient.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Coding\\Hivemind\\AICoreClient\\AICoreClient.csproj",
+        "projectUniqueName": "D:\\Coding\\GithubJarvis\\AICoreClient\\AICoreClient.csproj",
         "projectName": "AICoreClient",
-        "projectPath": "D:\\Coding\\Hivemind\\AICoreClient\\AICoreClient.csproj",
+        "projectPath": "D:\\Coding\\GithubJarvis\\AICoreClient\\AICoreClient.csproj",
         "packagesPath": "C:\\Users\\mehar\\.nuget\\packages\\",
-        "outputPath": "D:\\Coding\\Hivemind\\AICoreClient\\obj\\",
+        "outputPath": "D:\\Coding\\GithubJarvis\\AICoreClient\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

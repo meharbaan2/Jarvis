@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AIAssistantUI")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+77d7951c2544d37be81142119b7225545799e7d9")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e48c367be117b36a642c876c368986fb32580b85")]
 [assembly: System.Reflection.AssemblyProductAttribute("AIAssistantUI")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AIAssistantUI")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

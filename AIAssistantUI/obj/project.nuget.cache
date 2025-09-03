@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "Xe1po43EC98=",
+  "dgSpecHash": "ze75psL+FjI=",
   "success": true,
-  "projectFilePath": "D:\\Coding\\Hivemind\\AIAssistantUI\\AIAssistantUI.csproj",
+  "projectFilePath": "D:\\Coding\\GithubJarvis\\AIAssistantUI\\AIAssistantUI.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\mehar\\.nuget\\packages\\google.protobuf\\3.31.0\\google.protobuf.3.31.0.nupkg.sha512",
     "C:\\Users\\mehar\\.nuget\\packages\\grpc.core.api\\2.71.0\\grpc.core.api.2.71.0.nupkg.sha512",
