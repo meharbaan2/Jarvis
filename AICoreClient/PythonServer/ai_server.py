@@ -37,9 +37,9 @@ class AIService(ai_service_pb2_grpc.AIServiceServicer):
     def __init__(self):
         # Configuration
         self.model_name = "WizardLMTeam/WizardMath-7B-V1.1"
-        self.mistral_api_key = "ZIHMju2yT1xWtZ8MUexSMjQcmtEgQRqI"  # Replace with your key
+        self.mistral_api_key = ""  # Replace with your key
         self.mistral_model = "mistral-large-latest"  # Or "mistral-medium", "mistral-small"
-        self.weather_api_key = "10385f3a2ad33ef0b91d9672d48d7755" # openweather_key
+        self.weather_api_key = "" # openweather_key
         
         # Initialize with GPU optimization
         self.wizardmath_model = None
